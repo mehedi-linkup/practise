@@ -7,7 +7,7 @@
 @section('admin-content')
 
 
-<main>
+<main id="myuser">
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-12">
@@ -23,22 +23,24 @@
                         <form action="{{ (@$userImage) ? route('user-image.index', $userImage->id) : route('user-image.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
-                            <input type="hidden" name="old_image" value="{{ @$userImage->image }}">
+                            {{-- <input type="hidden" name="old_image" value="{{ @$userImage->image }}"> --}}
                             <div class="row">
                                 <div class="col-md-7 mb-2">
                                     <label for="name" class="mb-2"> User Name <span class="text-danger">*</span> </label>
-                                    <input type="text" name="name" value="{{ @$userImage->name }}" class="form-control mb-2" id="name" placeholder="Enter User">
+                                    {{-- <input type="text" name="name" value="{{ @$userImage->name }}" class="form-control mb-2" id="name" placeholder="Enter User"> --}}
+                                    <input type="text" class="form-control mb-2" v-model="myuser.name">
                                     @error('name') <span style="color: red">{{$message}}</span> @enderror
 
 
                                     <label for="address" class="mb-2"> User Address <span class="text-danger">*</span> </label>
-                                    <textarea name="address" id="address" rows="4" class="form-control">{{ @$userImage->address }}</textarea>
+                                    {{-- <textarea name="address" id="address" rows="4" class="form-control">{{ @$userImage->address }}</textarea> --}}
+                                    <textarea rows="4" class="form-control" v-model="myuser.address"></textarea>
                                     @error('address') <span style="color: red">{{$message}}</span> @enderror
                                 </div>
 
                                 <div class="col-md-5 mb-2">
                                     <label for="user_image" class="mb-2">User Image</label>
-                                    <input class="form-control" id="user_image" type="file" name="image" onchange="mainThambUrl(this)">
+                                    <input class="form-control image" id="user_image" type="file" onchange="mainThambUrl(this)">
                                     <div class="form-group mt-2">
                                         <img class="form-controlo img-thumbnail" src="{{(@$userImage) ? asset($userImage->image) : asset('uploads/no.png') }}" id="mainThmb" style="width: 150px;height: 120px;">
                                     </div>
@@ -109,8 +111,69 @@
 @endsection
 
 @push('admin-js')
+<script src="{{ asset('admin/js/vue/vue.min.js') }}"></script>
+<script src="{{ asset('admin/js/vue/axios.min.js') }}"></script>
+<script src="{{ asset('admin/js/vue/vue-select.min.js') }}"></script>
+<script src="{{ asset('admin/js/vue/moment.min.js') }}"></script>
 <script>
-   
+    Vue.component('v-select', VueSelect.VueSelect);
+    const app = new Vue({
+        el: '#myuser',
+        data() {
+            return {
+                myuser: {  
+                    id: parseInt({{ $id ?? '' }}),       
+                    name: '',
+                    address: '',
+                },
+                imageUrl: '',
+				selectedFile: null,
+            }
+        },
+
+        created(){
+           
+        },
+        methods: {    
+            previewImage(){
+				if(event.target.files.length > 0){
+					this.selectedFile = event.target.files[0];
+					this.imageUrl = URL.createObjectURL(this.selectedFile);
+				} else {
+					this.selectedFile = null;
+					this.imageUrl = null;
+				}
+			},
+            saveData(){
+                let fd = new FormData();
+                fd.append('image', this.selectedFile);
+                fd.append('data', JSON.stringify(this.myuser));
+
+                let url = '/user-store';
+                // if(this.myuser.id != 0){
+                //     url = '/user-store';
+                // }       
+
+                axios.post(url , fd)
+                .then(res => {
+                    alert(res.data.message);
+                    if(res.data.success){
+                        if(this.myuser.id != 0){
+                            window.location.href = "/userimage-list";
+                        }
+                        this.resetForm();
+                    }
+                })
+                .catch(err => {
+                    console.log(err.response.data.message)
+                })
+            },
+            resetForm() {
+                this.myuser.name = '';
+                this.myuser.address = '';
+            }
+        }
+    })
 </script>
 
 <script>

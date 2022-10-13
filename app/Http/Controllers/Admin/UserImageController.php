@@ -12,4 +12,11 @@ class UserImageController extends Controller
         
         return view('pages.admin.user_image');
     }
+    public function store(Request $request) {
+        return response()->json($request);
+        $userimage = new UserImage;
+        $userimage->name = $request->name;
+        $userimage->address = $request->address;
+        $userimage->image = $request->image;
+    }
 }
