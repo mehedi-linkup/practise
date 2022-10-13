@@ -20,7 +20,7 @@
                         @endif
                     </div>
                     <div class="card-body">
-                        <form action="{{ (@$userImage) ? route('user-image.index', $userImage->id) : route('user-image.store') }}" method="POST" enctype="multipart/form-data">
+                        <form @submit.prevent="saveData">
                             @csrf
                             
                             {{-- <input type="hidden" name="old_image" value="{{ @$userImage->image }}"> --}}
@@ -122,7 +122,7 @@
         data() {
             return {
                 myuser: {  
-                    id: parseInt({{ $id ?? '' }}),       
+                    // id: parseInt({{ $id ?? '' }}),       
                     name: '',
                     address: '',
                 },
@@ -146,7 +146,7 @@
 			},
             saveData(){
                 let fd = new FormData();
-                fd.append('image', this.selectedFile);
+                // fd.append('image', this.selectedFile);
                 fd.append('data', JSON.stringify(this.myuser));
 
                 let url = '/user-store';
@@ -158,9 +158,9 @@
                 .then(res => {
                     alert(res.data.message);
                     if(res.data.success){
-                        if(this.myuser.id != 0){
-                            window.location.href = "/userimage-list";
-                        }
+                        // if(this.myuser.id != 0){
+                        //     window.location.href = "/userimage-list";
+                        // }
                         this.resetForm();
                     }
                 })
